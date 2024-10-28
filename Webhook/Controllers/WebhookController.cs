@@ -36,8 +36,7 @@ namespace WebHookExample.Properties
     public class WebhookController : Controller
     {
         private readonly DataBaseContext _db;
-        //private readonly CreateMediaService _CreateMediaService;
-
+ 
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private static readonly Dictionary<int, string> securityTokens = new Dictionary<int, string>
@@ -50,7 +49,7 @@ namespace WebHookExample.Properties
             _logger = logger;
             _db = db;
             _mapper = mapper;
-            //_CreateMediaService = createMediaService;
+ 
         }
 
         [HttpPost]
@@ -75,7 +74,9 @@ namespace WebHookExample.Properties
                 {
                     Console.WriteLine("Handle message event...");
 
-                    string data = "", data_type = "",   fileName="", serverPath = "ticket/Files/";
+                    string data = "", data_type = "", fileName = "", serverPath = "ticket/Files/";
+                    //string serverPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\pishro\narsWEB\ticket\files"));
+
                     messageModel? messageData = body.Data.message;
                     string? type = messageData != null ? messageData.@type : null;
 
@@ -173,7 +174,7 @@ namespace WebHookExample.Properties
                             {
 
                                 await transaction.RollbackAsync();
-                                throw;
+                                return StatusCode(400, ex.Message + "  1");
                             }
                         }
                         int id = obj.Id;
@@ -233,7 +234,7 @@ namespace WebHookExample.Properties
                             byte[] pdfBytes = Convert.FromBase64String(data);
 
                             // مسیر فایل خروجی (مثال: wwwroot/files/output.pdf)
-                             fileName = id + "_" + body.Data.media.filename;
+                            fileName = id + "_" + body.Data.media.filename;
                             string outputPath = Path.Combine(serverPath, fileName);
                             // ذخیره کردن داده‌های باینری به عنوان فایل PDF
                             System.IO.File.WriteAllBytes(outputPath, pdfBytes);
@@ -273,7 +274,7 @@ namespace WebHookExample.Properties
                                 {
 
                                     await transaction.RollbackAsync();
-                                    throw;
+                                    return StatusCode(400, ex.Message);
                                 }
                             }
                         }
@@ -289,7 +290,7 @@ namespace WebHookExample.Properties
                             {
 
                                 existingTicket.Discription += " " + messageData.body;
-                                existingTicket.FileName=fileName;
+                                existingTicket.FileName = fileName;
                                 string Pcurentdate = DateConverter.ConvertToPersianDate(DateAndTime.Now);
                                 existingTicket.UpdateDate = DateTime.Now;
                                 existingTicket.PupdateDate = Pcurentdate;
@@ -353,7 +354,10 @@ namespace WebHookExample.Properties
                     return NotFound();
                 }
             }
-            catch (Exception ex) { return Ok("خطا رخ داد "); }
+            catch (Exception ex)
+            {
+                return StatusCode(400, ex.Message);
+            }
         }
 
 
