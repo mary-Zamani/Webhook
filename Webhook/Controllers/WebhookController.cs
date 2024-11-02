@@ -86,7 +86,7 @@ namespace WebHookExample.Properties
             {
                 Console.WriteLine("Handle message event...");
 
-                string data = "", data_type = "", fileName = "", serverPath = "ticket/Files/";
+                string data = "", data_type = "", fileName = "", serverPath = "http://pishro.farsauto.local:8080/ticket/files";
                 //string serverPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\pishro\narsWEB\ticket\files"));
 
                 messageModel? messageData = body.Data.message;
