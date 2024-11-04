@@ -53,9 +53,9 @@ namespace WebHookExample.Properties
         [HttpPost]
         public async Task<IActionResult> Get(string security_token, [FromBody] HookData body)
         {
-            //try
-            //{  // تبدیل درخواست وبهوک به JSON
-            string jsonData = JsonConvert.SerializeObject(body);
+
+           
+            string jsonData = System.Text.Json.JsonSerializer.Serialize(body);
 
             // ذخیره در دیتابیس
 
@@ -108,6 +108,7 @@ namespace WebHookExample.Properties
                     ReceivedMessages obj = new ReceivedMessages();
                     //var obj = _mapper.Map<ReceivedMessages>(body);
                     obj.EventType = body.EventType;
+                    obj.json = jsonData;
                     obj.From = messageSenderPhoneNumber;
                     obj.Data_body = messageContent;
                     obj.Message_body = messageData.body;
