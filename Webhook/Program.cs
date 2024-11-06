@@ -1,6 +1,7 @@
 using HangfireApp.Models;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Webhook.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add AutoMapper services
@@ -9,6 +10,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddDbContext<DataBaseContext>(option=>option.UseSqlServer(builder.Configuration.GetConnectionString("HangfireConnection")));
 builder.Services.AddControllers();
 builder.Services.AddSingleton<Dictionary<int, string>>();
+builder.Services.AddScoped<ReceiveMessagesService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

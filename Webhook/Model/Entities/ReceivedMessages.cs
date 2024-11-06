@@ -54,6 +54,7 @@ namespace Webhook.Model.Entities
         public bool? isStarred { get; set; } = null!;
         public bool? fromMe { get; set; } = null!;
         public bool? hasQuotedMsg { get; set; } = null!;
+        public string? QuotedMsgId { get; set; } = null!;
         public bool? isGif { get; set; } = null!;
         public int? Media_filesize { get; set; } = null!;
     }

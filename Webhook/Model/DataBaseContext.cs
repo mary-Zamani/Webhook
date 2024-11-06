@@ -17,6 +17,7 @@ namespace HangfireApp.Models
         public DbSet<ticket> ticket { get; set; }
         public DbSet<ticketResponse> ticketResponse { get; set; }
         public DbSet<waapi> waapi { get; set; }
+        public DbSet<webhookError> webhookError { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
@@ -24,6 +25,7 @@ namespace HangfireApp.Models
             modelBuilder.Entity<Customers>().HasKey(t => t.Id);
             modelBuilder.Entity<ticketResponse>().HasKey(t => t.s_id); 
             modelBuilder.Entity<waapi>().HasKey(t => t.Id); 
+            modelBuilder.Entity<webhookError>().HasKey(t => t.Id); 
         }
 
 
