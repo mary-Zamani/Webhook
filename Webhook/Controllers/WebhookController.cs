@@ -58,7 +58,7 @@ namespace WebHookExample.Properties
 
             string jsonData = System.Text.Json.JsonSerializer.Serialize(body);
 
-
+            string QuotedMsgId = "";
 
             if (body.InstanceId == 0 || body.EventType == null || body.Data == null)
             {
@@ -122,7 +122,7 @@ namespace WebHookExample.Properties
                             obj.MessageId = messageId;
                             if (messageData.hasQuotedMsg.Value)
                             {
-                             string QuotedMsgId = await  _receiveMessagesService.GetMessageByIdAsync(MessageId_serialized);
+                              QuotedMsgId = await  _receiveMessagesService.GetMessageByIdAsync(MessageId_serialized);
                                 obj.QuotedMsgId= QuotedMsgId;
                             }
                             if (messageData != null)

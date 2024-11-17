@@ -12,5 +12,7 @@
         public int? UpdateDate { get; set; }
         public bool Isdeleted { get; set; } = false;
         public string? PcreateDate { get; set; }
+        public string? MessageId_serialized { get; set; }
+        public string? QuotedMsgId { get; set; }
     }
 }

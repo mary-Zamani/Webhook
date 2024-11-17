@@ -29,8 +29,11 @@ namespace Webhook.ViewModels.message
 
     public class DataDetails
     {
-        public MessageId? Id { get; set; }
+        
         public QuotedMessage? QuotedMsg { get; set; }
+        public string? quotedStanzaID { get; set; } = null!;
+
+        public MessageId? quotedParticipant;
 
     }
 
