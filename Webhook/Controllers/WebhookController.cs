@@ -122,8 +122,8 @@ namespace WebHookExample.Properties
                             obj.MessageId = messageId;
                             if (messageData.hasQuotedMsg.Value)
                             {
-                              QuotedMsgId = await  _receiveMessagesService.GetMessageByIdAsync(MessageId_serialized);
-                                obj.QuotedMsgId= QuotedMsgId;
+                                QuotedMsgId = await _receiveMessagesService.GetMessageByIdAsync(MessageId_serialized);
+                                obj.QuotedMsgId = QuotedMsgId;
                             }
                             if (messageData != null)
                             {
@@ -253,37 +253,37 @@ namespace WebHookExample.Properties
                             {
                                 //using (var transaction = await _db.Database.BeginTransactionAsync())
                                 //{
-                                    //try
-                                    //{
-                                    Customers customObj = new Customers();
-                                    customObj.Mobile = messageSenderPhoneNumber;
-                                    customObj.Name = messageData._data.notifyName;
-                                    customObj.CreateDate = DateTime.Now;
-                                    _db.Customers.Add(customObj);
-                                    _db.SaveChanges();
-                                    //==================
-                                    ticket ticketObj = new ticket();
-                                    ticketObj.CustomerId = customObj.Id;
-                                    ticketObj.CustomerSendUc = customObj.Id;
-                                    ticketObj.CustomerMobile = messageSenderPhoneNumber;
-                                    ticketObj.Subject = "پیام واتس آپ ";
-                                    ticketObj.Discription = messageData.body;
-                                    ticketObj.Status = 1;
-                                    ticketObj.FileName = fileName;
-                                    string Pcurentdate = DateConverter.ConvertToPersianDate(DateAndTime.Now);
-                                    ticketObj.CreateDate = DateTime.Now;
-                                    ticketObj.PcreateDate = Pcurentdate;
-                                    _db.ticket.Add(ticketObj);
-                                    _db.SaveChanges();
-                                    await transaction.CommitAsync();
+                                //try
+                                //{
+                                Customers customObj = new Customers();
+                                customObj.Mobile = messageSenderPhoneNumber;
+                                customObj.Name = messageData._data.notifyName;
+                                customObj.CreateDate = DateTime.Now;
+                                _db.Customers.Add(customObj);
+                                _db.SaveChanges();
+                                //==================
+                                ticket ticketObj = new ticket();
+                                ticketObj.CustomerId = customObj.Id;
+                                ticketObj.CustomerSendUc = customObj.Id;
+                                ticketObj.CustomerMobile = messageSenderPhoneNumber;
+                                ticketObj.Subject = "پیام واتس آپ ";
+                                ticketObj.Discription = messageData.body;
+                                ticketObj.Status = 1;
+                                ticketObj.FileName = fileName;
+                                string Pcurentdate = DateConverter.ConvertToPersianDate(DateAndTime.Now);
+                                ticketObj.CreateDate = DateTime.Now;
+                                ticketObj.PcreateDate = Pcurentdate;
+                                _db.ticket.Add(ticketObj);
+                                _db.SaveChanges();
+                                await transaction.CommitAsync();
 
-                                    //}
-                                    //catch (Exception ex)
-                                    //{
-                                                                                       
-                                    //    await transaction.RollbackAsync();
-                                    //    return StatusCode(400, ex.Message);
-                                    //}
+                                //}
+                                //catch (Exception ex)
+                                //{
+
+                                //    await transaction.RollbackAsync();
+                                //    return StatusCode(400, ex.Message);
+                                //}
                                 //}
                             }
                             else
@@ -304,50 +304,55 @@ namespace WebHookExample.Properties
                                     existingTicket.PupdateDate = Pcurentdate;
                                     //using (var transaction = await _db.Database.BeginTransactionAsync())
                                     //{
-                                        //try
-                                        //{
-                                        await _db.SaveChangesAsync();
-                                        await transaction.CommitAsync();
-                                        //}
-                                        //catch (DbUpdateConcurrencyException)
-                                        //{
-                                        //    await transaction.RollbackAsync();
-                                        //    return StatusCode(500, "Error updating the product.");
-                                        //}
+                                    //try
+                                    //{
+                                    await _db.SaveChangesAsync();
+                                    await transaction.CommitAsync();
+                                    //}
+                                    //catch (DbUpdateConcurrencyException)
+                                    //{
+                                    //    await transaction.RollbackAsync();
+                                    //    return StatusCode(500, "Error updating the product.");
+                                    //}
                                     //}
                                 }
                                 else
                                 {
                                     //using (var transaction = await _db.Database.BeginTransactionAsync())
                                     //{
-                                        //try
-                                        //{
-                                        ticketResponse responseObj = new ticketResponse();
-                                        responseObj.TicketId = existingTicket.s_id;
-                                        responseObj.CustomerId = CustomObj[0].Id;
-                                        responseObj.RefId = existingTicket.Asign;
-                                        responseObj.Response = messageData.body;
-                                        string Pcurentdate = DateConverter.ConvertToPersianDate(DateAndTime.Now);
-                                        responseObj.CreateDate = DateTime.Now;
-                                        responseObj.PcreateDate = Pcurentdate;
-                                        _db.ticketResponse.Add(responseObj);
-                                        _db.SaveChanges();
+                                    //try
+                                    //{
+                                    ticketResponse responseObj = new ticketResponse();
+                                    responseObj.TicketId = existingTicket.s_id;
+                                    responseObj.CustomerId = CustomObj[0].Id;
+                                    responseObj.RefId = existingTicket.Asign;
+                                    responseObj.Response = messageData.body;
+                                    string Pcurentdate = DateConverter.ConvertToPersianDate(DateAndTime.Now);
+                                    responseObj.CreateDate = DateTime.Now;
+                                    responseObj.PcreateDate = Pcurentdate;
+                                    if (messageData.hasQuotedMsg.Value)
 
-                                        existingTicket.CustomerSendUc = CustomObj[0].Id;
-                                        existingTicket.ReciveUc = existingTicket.SendUc;
-                                        existingTicket.CustomerReciveUc = null;
-                                        existingTicket.SendUc = null;
-                                        existingTicket.FileName = fileName;
-                                        existingTicket.UpdateDate = DateTime.Now;
-                                        existingTicket.PupdateDate = Pcurentdate;
-                                        await _db.SaveChangesAsync();
-                                        await transaction.CommitAsync();
-                                        //}
-                                        //catch (DbUpdateConcurrencyException)
-                                        //{
-                                        //    await transaction.RollbackAsync();
-                                        //    return StatusCode(500, "Error updating the product.");
-                                        //}
+                                        responseObj.QuotedMsgId = QuotedMsgId;
+                                    
+                                    responseObj.MessageId_serialized = MessageId_serialized;
+                                    _db.ticketResponse.Add(responseObj);
+                                    _db.SaveChanges();
+
+                                    existingTicket.CustomerSendUc = CustomObj[0].Id;
+                                    existingTicket.ReciveUc = existingTicket.SendUc;
+                                    existingTicket.CustomerReciveUc = null;
+                                    existingTicket.SendUc = null;
+                                    existingTicket.FileName = fileName;
+                                    existingTicket.UpdateDate = DateTime.Now;
+                                    existingTicket.PupdateDate = Pcurentdate;
+                                    await _db.SaveChangesAsync();
+                                    await transaction.CommitAsync();
+                                    //}
+                                    //catch (DbUpdateConcurrencyException)
+                                    //{
+                                    //    await transaction.RollbackAsync();
+                                    //    return StatusCode(500, "Error updating the product.");
+                                    //}
                                     //}
                                 }
                             }
@@ -372,7 +377,7 @@ namespace WebHookExample.Properties
                     {
                         json = jsonData,
                         createdate = DateTime.UtcNow,
-                        
+
                     };
 
                     _db.webhookError.Add(log);

@@ -21,17 +21,20 @@ namespace Webhook.Services
         private readonly string _bearerToken;
 
 
-        public ReceiveMessagesService(DataBaseContext dbContext )
+        public ReceiveMessagesService(DataBaseContext dbContext)
         {
             _db = dbContext;
-           _instance= _db.waapi.FirstOrDefault().InstanceId;
-           _token= _db.waapi.FirstOrDefault().token;
+            var wapObj = new waapi();
+            wapObj = _db.waapi.FirstOrDefault();
+            if (wapObj == null) return;
+           
+                _instance = _db.waapi.FirstOrDefault().InstanceId;
+                _token = _db.waapi.FirstOrDefault().token;
+            
             _apiUrl = $"https://waapi.app/api/v1/instances/{_instance}/client/action/get-message-by-id";
             _bearerToken = _token;
         }
-        
-       // private readonly string _apiUrl = "https://waapi.app/api/v1/instances/"+_instance+"/client/action/get-message-by-id";
-        //private readonly string _bearerToken = "YrgjSPik5AJMIWXEYp7fKCzHeaaxPK0rbTcEytgZed652146";
+ 
         public async Task AddUser(ReceivedMessages user)
         {
             await _db.ReceivedMessages.AddAsync(user);
@@ -64,16 +67,16 @@ namespace Webhook.Services
 
             if (!response.IsSuccessful)
             {
-                
+
                 throw new Exception($"Error retrieving message: {response.StatusCode} - {response.Content}");
             }
 
             // پردازش پاسخ
-           
-            var responseData  = JsonConvert.DeserializeObject<ResponseData>(response.Content);
-            result ="false_"+ responseData.Data.Data.Message._Data.quotedParticipant._Serialized+"_"+
-               responseData.Data.Data.Message._Data.quotedStanzaID; 
-             
+
+            var responseData = JsonConvert.DeserializeObject<ResponseData>(response.Content);
+            result = "false_" + responseData.Data.Data.Message._Data.quotedParticipant._Serialized + "_" +
+               responseData.Data.Data.Message._Data.quotedStanzaID;
+
             return result;
         }
 
