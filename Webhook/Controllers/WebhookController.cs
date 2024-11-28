@@ -99,7 +99,7 @@ namespace WebHookExample.Properties
                             // Run your business logic: someone has sent you a WhatsApp message
                             //=========================
                             ReceivedMessages obj = new ReceivedMessages();
-                            //var obj = _mapper.Map<ReceivedMessages>(body);
+                            //var obj1 = _mapper.Map<ReceivedMessages>(body);
                             obj.EventType = body.EventType;
                             obj.json = jsonData;
                             obj.From = messageSenderPhoneNumber;
@@ -175,17 +175,11 @@ namespace WebHookExample.Properties
                                 _db.SaveChanges();
                             }
 
-                            //await transaction.CommitAsync();
-
-                            //}
-                            //catch (Exception ex)
-                            //{
-
-                            //    await transaction.RollbackAsync();
-                            //    return StatusCode(400, ex.Message + "  1");
-                            //}
-                            //}
+                            
                             int id = obj.Id;
+                            //============create File in Path 
+                            //if(messageData.@type!= "chat")
+                            //_receiveMessagesService.createFile(serverPath, messageData.@type, data, data_type, id,out fileName);
                             if (messageData.@type == "image" && data != null)
                             {
 
@@ -251,10 +245,7 @@ namespace WebHookExample.Properties
                             var CustomObj = _db.Customers.Where(i => i.Mobile == messageSenderPhoneNumber).ToList();
                             if (CustomObj.Count() == 0)
                             {
-                                //using (var transaction = await _db.Database.BeginTransactionAsync())
-                                //{
-                                //try
-                                //{
+                                 
                                 Customers customObj = new Customers();
                                 customObj.Mobile = messageSenderPhoneNumber;
                                 customObj.Name = messageData._data.notifyName;
@@ -276,19 +267,10 @@ namespace WebHookExample.Properties
                                 _db.ticket.Add(ticketObj);
                                 _db.SaveChanges();
                                 await transaction.CommitAsync();
-
-                                //}
-                                //catch (Exception ex)
-                                //{
-
-                                //    await transaction.RollbackAsync();
-                                //    return StatusCode(400, ex.Message);
-                                //}
-                                //}
                             }
                             else
                             {
-                                //var x= _db.ticket.Where(i=>i.CustomerId== CustomObj[0].Id).ToList();
+                              
                                 var existingTicket = await _db.ticket.Where(i => i.CustomerId == CustomObj[0].Id).FirstOrDefaultAsync();
                                 if (existingTicket == null)
                                 {
@@ -302,26 +284,14 @@ namespace WebHookExample.Properties
                                     string Pcurentdate = DateConverter.ConvertToPersianDate(DateAndTime.Now);
                                     existingTicket.UpdateDate = DateTime.Now;
                                     existingTicket.PupdateDate = Pcurentdate;
-                                    //using (var transaction = await _db.Database.BeginTransactionAsync())
-                                    //{
-                                    //try
-                                    //{
+                                   
                                     await _db.SaveChangesAsync();
                                     await transaction.CommitAsync();
-                                    //}
-                                    //catch (DbUpdateConcurrencyException)
-                                    //{
-                                    //    await transaction.RollbackAsync();
-                                    //    return StatusCode(500, "Error updating the product.");
-                                    //}
-                                    //}
+                                     
                                 }
                                 else
                                 {
-                                    //using (var transaction = await _db.Database.BeginTransactionAsync())
-                                    //{
-                                    //try
-                                    //{
+                                    
                                     ticketResponse responseObj = new ticketResponse();
                                     responseObj.TicketId = existingTicket.s_id;
                                     responseObj.CustomerId = CustomObj[0].Id;
@@ -330,6 +300,8 @@ namespace WebHookExample.Properties
                                     string Pcurentdate = DateConverter.ConvertToPersianDate(DateAndTime.Now);
                                     responseObj.CreateDate = DateTime.Now;
                                     responseObj.PcreateDate = Pcurentdate;
+                                    responseObj.FileName = fileName;
+                                    responseObj.ReceivedMessagesId = id;
                                     if (messageData.hasQuotedMsg.Value)
 
                                         responseObj.QuotedMsgId = QuotedMsgId;
@@ -347,13 +319,6 @@ namespace WebHookExample.Properties
                                     existingTicket.PupdateDate = Pcurentdate;
                                     await _db.SaveChangesAsync();
                                     await transaction.CommitAsync();
-                                    //}
-                                    //catch (DbUpdateConcurrencyException)
-                                    //{
-                                    //    await transaction.RollbackAsync();
-                                    //    return StatusCode(500, "Error updating the product.");
-                                    //}
-                                    //}
                                 }
                             }
 

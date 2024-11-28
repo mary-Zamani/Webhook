@@ -14,5 +14,7 @@
         public string? PcreateDate { get; set; }
         public string? MessageId_serialized { get; set; }
         public string? QuotedMsgId { get; set; }
+        public string? FileName { get; set; }
+        public int? ReceivedMessagesId { get; set; }
     }
 }

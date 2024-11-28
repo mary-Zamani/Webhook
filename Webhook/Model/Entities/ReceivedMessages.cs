@@ -57,5 +57,6 @@ namespace Webhook.Model.Entities
         public string? QuotedMsgId { get; set; } = null!;
         public bool? isGif { get; set; } = null!;
         public int? Media_filesize { get; set; } = null!;
+        public string? FileName { get; set; } = null!;
     }
 }
