@@ -7,6 +7,7 @@ namespace Webhook.Model.Entities
         public int Id { get; set; }
         public string? json { get; set; }
         public DateTime createdate { get; set; }
+        public string? error { get; set; }
         
       
         

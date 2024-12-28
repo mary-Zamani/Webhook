@@ -1,12 +1,15 @@
+ 
 using HangfireApp.Models;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using Webhook.Services;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add AutoMapper services
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add services to the container.
+ 
 builder.Services.AddDbContext<DataBaseContext>(option=>option.UseSqlServer(builder.Configuration.GetConnectionString("HangfireConnection")));
 builder.Services.AddControllers();
 builder.Services.AddSingleton<Dictionary<int, string>>();
@@ -32,6 +35,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
- 
+
+app.UseStaticFiles( ); 
 
 app.Run();

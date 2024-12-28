@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿ 
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -27,6 +28,15 @@ using SixLabors.ImageSharp;
 using Image = SixLabors.ImageSharp.Image;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using NAudio.Lame;
+using NAudio.Wave;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Hosting.Server;
+using NVorbis;
+using Concentus.Structs;
+using Concentus.Oggfile;
+ 
+ 
 
 namespace WebHookExample.Properties
 {
@@ -37,26 +47,38 @@ namespace WebHookExample.Properties
     {
         private readonly DataBaseContext _db;
 
-        private readonly ILogger _logger;
-        private readonly IMapper _mapper;
+      
+       
         private readonly Dictionary<int, string> securityTokens;
         private readonly ReceiveMessagesService _receiveMessagesService;
+      
 
-        public WebhookController(ILogger<WebhookController> logger, DataBaseContext db, IMapper mapper, Dictionary<int, string> securityTokens, ReceiveMessagesService receiveMessagesService)
+        public WebhookController(  DataBaseContext db,  Dictionary<int, string> securityTokens, ReceiveMessagesService receiveMessagesService )
         {
-            _logger = logger;
+             
             _db = db;
-            _mapper = mapper;
+          
             this.securityTokens = _db.waapi.ToDictionary(t => t.InstanceId, t => t.token);
             _receiveMessagesService = receiveMessagesService;
+             
         }
 
         [HttpPost]
         public async Task<IActionResult> Get(string security_token, [FromBody] HookData body)
         {
 
+          
 
             string jsonData = System.Text.Json.JsonSerializer.Serialize(body);
+            var log = new webhookError
+            {
+                json = jsonData,
+                createdate = DateTime.UtcNow,
+
+            };
+
+            _db.webhookError.Add(log);
+            await _db.SaveChangesAsync();
 
             string QuotedMsgId = "";
 
@@ -79,8 +101,7 @@ namespace WebHookExample.Properties
                     {
                         Console.WriteLine("Handle message event...");
 
-                        string data = "", data_type = "", fileName = "", serverPath = "ticket/Files/";
-                        //string serverPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\pishro\narsWEB\ticket\files"));
+                        string data = "", data_type = "", fileName = "", serverPath = "wwwroot/ticket/Files/";
 
                         messageModel? messageData = body.Data.message;
                         string? type = messageData != null ? messageData.@type : null;
@@ -215,22 +236,60 @@ namespace WebHookExample.Properties
                             }
                             else if (messageData.@type == "ptt" && data != null)
                             {
-                                // ۱. حذف header Base64 (در صورت وجود)
-                                if (data.StartsWith("data:audio/wav;base64,")) // تغییر فرمت به مورد نیاز
-                                {
-                                    data = data.Substring("data:audio/wav;base64,".Length);
-                                }
 
-                                // ۲. رمزگشایی رشته Base64 به آرایه بایت
+                                //====================
+
+                                string mp3FilePath = Path.Combine(serverPath, $"{id}_audio.mp3");
+                               
                                 byte[] audioBytes = Convert.FromBase64String(data);
-                                fileName = id + "_audio.wav";
-                                // ۳. مشخص کردن مسیر ذخیره فایل
-                                string filePath = Path.Combine(serverPath, fileName); // تغییر مسیر و نام فایل به دلخواه
+                                var filePath = Directory.GetCurrentDirectory()+"\\";// $@"C:\project\Webhook\";
+                                string tempOggFile = Path.Combine( serverPath, $"{id}_audio.ogg" );
+                           
+                                string fileWav = Path.Combine(serverPath, $"{id}_audio.wav");
+                                System.IO.File.WriteAllBytes(tempOggFile, audioBytes);
 
-                                // ۴. ذخیره آرایه بایت به عنوان فایل
-                                System.IO.File.WriteAllBytes(filePath, audioBytes);
+                                fileName = $"{id}_audio.wav";
+                                using (FileStream fileIn = new FileStream($"{filePath}{tempOggFile}", FileMode.Open))
+                                using (MemoryStream pcmStream = new MemoryStream())
+                                {
+                                    OpusDecoder decoder = OpusDecoder.Create(48000, 1);
+                                    OpusOggReadStream oggIn = new OpusOggReadStream(decoder, fileIn);
+                                    while (oggIn.HasNextPacket)
+                                    {
+                                        short[] packet = oggIn.DecodeNextPacket();
+                                        if (packet != null)
+                                        {
+                                            for (int i = 0; i < packet.Length; i++)
+                                            {
+                                                var bytes = BitConverter.GetBytes(packet[i]);
+                                                pcmStream.Write(bytes, 0, bytes.Length);
+                                            }
+                                        }
+                                    }
+                                    pcmStream.Position = 0;
+                                    var wavStream = new RawSourceWaveStream(pcmStream, new WaveFormat(48000, 1));
+                                    var sampleProvider = wavStream.ToSampleProvider();
+                                    WaveFileWriter.CreateWaveFile16($"{filePath}{fileWav}", sampleProvider);
+
+                                    //===========
+                                    //System.IO.File.Delete(tempOggFile);
+
+                                }
+                                // خواندن فایل WAV
+                                //using (var reader = new WaveFileReader($"{filePath}{fileWav}"))
+                                //{
+                                //    // ایجاد فایل MP3 برای نوشتن
+                                //    using (var writer = new LameMP3FileWriter(mp3FilePath, reader.WaveFormat, LAMEPreset.STANDARD))
+                                //    {
+                                //        // خواندن داده‌ها از فایل WAV و نوشتن به فایل MP3
+                                //        reader.CopyTo(writer);
+                                //    }
+                                //}
+                                //fileName = mp3FilePath;
+                                //System.IO.File.Delete(fileWav);
 
                             }
+
                             else if (messageData.@type == "document" && data != null)
                             {
                                 byte[] pdfBytes = Convert.FromBase64String(data);
@@ -309,11 +368,14 @@ namespace WebHookExample.Properties
                                     responseObj.MessageId_serialized = MessageId_serialized;
                                     _db.ticketResponse.Add(responseObj);
                                     _db.SaveChanges();
-
-                                    existingTicket.CustomerSendUc = CustomObj[0].Id;
-                                    existingTicket.ReciveUc = existingTicket.SendUc;
-                                    existingTicket.CustomerReciveUc = null;
-                                    existingTicket.SendUc = null;
+                                    if (existingTicket.ReciveUc == null)
+                                    {
+                                        existingTicket.CustomerSendUc = CustomObj[0].Id;
+                                        existingTicket.ReciveUc = existingTicket.SendUc;
+                                        existingTicket.CustomerReciveUc = null;
+                                        existingTicket.SendUc = null;
+                                    }
+                                    
                                     existingTicket.FileName = fileName;
                                     existingTicket.UpdateDate = DateTime.Now;
                                     existingTicket.PupdateDate = Pcurentdate;
@@ -338,14 +400,14 @@ namespace WebHookExample.Properties
                 {
                     await transaction.RollbackAsync();
 
-                    var log = new webhookError
+                    var log1 = new webhookError
                     {
                         json = jsonData,
                         createdate = DateTime.UtcNow,
-
+                        error=ex.Message,
                     };
 
-                    _db.webhookError.Add(log);
+                    _db.webhookError.Add(log1);
                     await _db.SaveChangesAsync();
 
                     throw;
